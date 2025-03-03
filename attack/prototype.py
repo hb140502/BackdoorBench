@@ -62,6 +62,8 @@ class NormalCase:
                             help='choose which kind of model')
         parser.add_argument('--save_folder_name', type=str,
                             help='(Optional) should be time str + given unique identification str')
+        parser.add_argument('--save_parent_dir', type=str,
+                            help='Should be str of an existing directory where --save_folder will be stored')
         parser.add_argument('--git_hash', type=str,
                             help='git hash number, in order to find which version of code is used')
         parser.add_argument("--yaml_path", type=str, default="./config/attack/prototype/cifar10.yaml")
@@ -88,10 +90,10 @@ class NormalCase:
                 run_info=('afterwards' if 'load_path' in args.__dict__ else 'attack') + '_' + (
                     args.attack if 'attack' in args.__dict__ else "prototype"),
                 given_load_file_path=args.load_path if 'load_path' in args else None,
-                all_record_folder_path='./record',
+                all_record_folder_path=args.save_parent_dir,
             )
         else:
-            save_path = './record/' + args.save_folder_name
+            save_path = args.save_parent_dir + args.save_folder_name
             os.mkdir(save_path)
         args.save_path = save_path
 
