@@ -93,7 +93,7 @@ class NormalCase:
                 all_record_folder_path=args.save_parent_dir,
             )
         else:
-            save_path = args.save_parent_dir + args.save_folder_name
+            save_path = args.save_parent_dir + '/' +  args.save_folder_name
             os.mkdir(save_path)
         args.save_path = save_path
 
