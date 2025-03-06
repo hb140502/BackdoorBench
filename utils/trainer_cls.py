@@ -12,10 +12,10 @@ from time import time
 from copy import deepcopy
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from utils.prefetch import PrefetchLoader, prefetch_transform
 from utils.bd_dataset import prepro_cls_DatasetBD
-
 
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
@@ -1080,7 +1080,6 @@ class ModelTrainerCLS_v2():
             )
             for name, test_dataset in test_dataset_dict.items()
         }
-        print("!!!set_with_dataset!!!")
         self.set_with_dataloader(
             train_dataloader = train_dataloader,
             test_dataloader_dict = test_dataloader_dict,
@@ -1135,27 +1134,18 @@ class ModelTrainerCLS_v2():
             logging.warning("No enough batch loss to get the one epoch loss")
 
     def one_forward_backward(self, x, labels, device, verbose=0):
-        print("!!!1!!!")
         self.model.train()
         self.model.to(device, non_blocking=self.non_blocking)
-        print("!!!2!!!")
         x, labels = x.to(device, non_blocking=self.non_blocking), labels.to(device, non_blocking=self.non_blocking)
-        print("!!!3!!!")
         log_probs = self.model(x)
         loss = self.criterion(log_probs, labels.long())
-        print("!!!3.1!!!")
         loss.backward()
-        print("!!!3.2!!!")
         self.optimizer.step()
-        print("!!!3.3!!!")
         self.optimizer.zero_grad()
-        print("!!!4!!!")
         batch_loss = loss.item()
-        print("!!!5!!!")
         if verbose == 1:
             batch_predict = torch.max(log_probs, -1)[1].detach().clone().cpu()
             return batch_loss, batch_predict
-        print("!!!6!!!")
         return batch_loss, None
 
     def train(self, epochs = 0, batchs = 0):
@@ -1262,7 +1252,6 @@ class ModelTrainerCLS_v2():
                                    prefetch_transform_attr_name,
                                    non_blocking,
                                    ):
-        print("!!!train_with_test_each_epoch!!!")
         self.set_with_dataloader(
             train_dataloader,
             test_dataloader_dict,
@@ -1453,7 +1442,7 @@ class PureCleanModelTrainer(ModelTrainerCLS_v2):
             batch_poison_indicator_list = []
             batch_original_targets_list = []
 
-        for batch_idx in range(self.batch_num_per_epoch):
+        for batch_idx in tqdm(range(self.batch_num_per_epoch), desc="Training one epoch on mix..."):
             x, labels, original_index, poison_indicator, original_targets  = self.get_one_batch()
             one_batch_loss, batch_predict = self.one_forward_backward(x, labels, self.device, verbose)
             batch_loss_list.append(one_batch_loss)
@@ -1568,7 +1557,6 @@ class PureCleanModelTrainer(ModelTrainerCLS_v2):
                 "clean_test_dataloader":clean_test_dataloader,
                 "bd_test_dataloader":bd_test_dataloader,
             }
-        print("!!!train_with_test_each_epoch_on_mix!!!")
         self.set_with_dataloader(
             train_dataloader,
             test_dataloader_dict,
@@ -1764,7 +1752,7 @@ class BackdoorModelTrainer(ModelTrainerCLS_v2):
             batch_poison_indicator_list = []
             batch_original_targets_list = []
 
-        for batch_idx in range(self.batch_num_per_epoch):
+        for batch_idx in tqdm(range(self.batch_num_per_epoch), desc="Training one epoch on mix..."):
             x, labels, original_index, poison_indicator, original_targets  = self.get_one_batch()
             one_batch_loss, batch_predict = self.one_forward_backward(x, labels, self.device, verbose)
             batch_loss_list.append(one_batch_loss)
@@ -1879,7 +1867,6 @@ class BackdoorModelTrainer(ModelTrainerCLS_v2):
                 "clean_test_dataloader":clean_test_dataloader,
                 "bd_test_dataloader":bd_test_dataloader,
             }
-        print("!!!train_with_test_each_epoch_on_mix 2!!!")
         self.set_with_dataloader(
             train_dataloader,
             test_dataloader_dict,
@@ -1909,14 +1896,12 @@ class BackdoorModelTrainer(ModelTrainerCLS_v2):
         test_ra_list = []
 
         for epoch in range(total_epoch_num):
-            print("!!!start epoch!!!")
             train_epoch_loss_avg_over_batch, \
             train_epoch_predict_list, \
             train_epoch_label_list, \
             train_epoch_original_index_list, \
             train_epoch_poison_indicator_list, \
             train_epoch_original_targets_list = self.train_one_epoch_on_mix(verbose=1)
-            print("!!!finished training epoch!!!")
             train_mix_acc = all_acc(train_epoch_predict_list, train_epoch_label_list)
 
             train_bd_idx = torch.where(train_epoch_poison_indicator_list == 1)[0]
