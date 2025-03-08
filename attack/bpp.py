@@ -67,8 +67,8 @@ import torch
 import torchvision.transforms as transforms
 
 import random
-from numba import jit
-from numba.types import float64, int64
+# from numba import jit
+# from numba.types import float64, int64
 
 from utils.aggregate_block.dataset_and_transform_generate import get_dataset_normalization, get_dataset_denormalization
 from utils.aggregate_block.model_trainer_generate import generate_cls_model
@@ -154,12 +154,12 @@ def np_4d_to_tensor(inputs, args):
     return inputs_clone
 
 
-@jit(float64[:](float64[:], int64, float64[:]), nopython=True)
+# @jit(float64[:](float64[:], int64, float64[:]), nopython=True)
 def rnd1(x, decimals, out):
     return np.round_(x, decimals, out)
 
 
-@jit(nopython=True)
+# @jit(nopython=True)
 def floydDitherspeed(image, squeeze_num):
     channel, h, w = image.shape
     for y in range(h):
