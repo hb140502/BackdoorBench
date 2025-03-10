@@ -27,7 +27,8 @@ yaml_conf="--yaml_path config/attack/custom/cifar10.yaml"
 # Add additional attack-specific configuration unless attack == prototype (clean model)
 if [[ $attack != "prototype" ]]; then
     yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
+    attack_opts="--attack_target 0 --pratio 0.05"
 fi
 
 # TODO: make pratio, dataset and model variable
-python ./attack/$attack.py $yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --attack_target 0 --model resnet18 --dataset cifar10 --pratio 0.05 --epochs 100 --device cuda:0
+python ./attack/$attack.py $yaml_conf $attack_opts --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --model resnet18 --dataset cifar10 --epochs 100 --device cuda:0
