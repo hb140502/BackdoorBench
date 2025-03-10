@@ -8,8 +8,15 @@ data_dir="$my_dir/data"
 record_dir="$my_dir/record"
 timestamp=$(date +"%d-%m_%H:%M")
 
-if [[ ! $attack=~"^badnet|blended|wanet|bpp$" ]]; then
+if [[ ! $attack =~ "^badnet|blended|wanet|bpp|prototype$" ]]; then
     echo "Attack $attack is not supported"
+    exit 1
+fi
+
+gpu=$(python get_gpu.py)
+
+if [[ ! $gpu =~ "RTX 2080 Ti" ]]; then
+    echo "Unexpected GPU: ${gpu}"
     exit 1
 fi
 
@@ -23,4 +30,4 @@ if [[ $attack != "prototype" ]]; then
 fi
 
 # TODO: make pratio, dataset and model variable
-python ./attack/$attack.py $yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --attack_target 0 --model resnet18 --dataset cifar10 --pratio 0.05 --epochs 0 --device cpu
+python ./attack/$attack.py $yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --attack_target 0 --model resnet18 --dataset cifar10 --pratio 0.05 --epochs 100 --device cuda:0
