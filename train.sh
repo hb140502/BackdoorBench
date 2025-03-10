@@ -8,7 +8,9 @@ data_dir="$my_dir/data"
 record_dir="$my_dir/record"
 timestamp=$(date +"%d-%m_%H:%M")
 
-if [[ ! $attack=~"^badnet|blended|wanet|bpp$" ]]; then
+model_regex="^prototype|badnet|blended|wanet|bpp$"
+
+if [[ ! $attack =~ $model_regex ]]; then
     echo "Attack $attack is not supported"
     exit 1
 fi
