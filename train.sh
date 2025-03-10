@@ -14,10 +14,13 @@ if [[ ! $attack=~"^badnet|blended|wanet|bpp$" ]]; then
     exit 1
 fi
 
-# Merge common dataset configuration and attack-specific configuration
 attack_id="${attack}_${timestamp}"
-yaml_conf="config/attack/tmp/$attack_id.yaml"
-touch $yaml_conf
-cat config/attack/custom/cifar10.yaml config/attack/custom/$attack.yaml >> $yaml_conf
 
-python ./attack/$attack.py $flags --yaml_path $repo_dir/$yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --epochs 0 --device cpu
+yaml_conf="--yaml_path config/attack/custom/cifar10.yaml"
+
+# Add additional attack-specific configuration unless attack == prototype (clean model)
+if [[ $attack != "prototype" ]]; then
+    yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
+fi
+
+python ./attack/$attack.py $yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --epochs 0 --device cpu
