@@ -8,7 +8,6 @@ data_dir="$my_dir/data"
 record_dir="$my_dir/record"
 timestamp=$(date +"%d-%m_%H:%M")
 
-
 if [[ ! $attack=~"^badnet|blended|wanet|bpp$" ]]; then
     echo "Attack $attack is not supported"
     exit 1
@@ -23,4 +22,5 @@ if [[ $attack != "prototype" ]]; then
     yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
 fi
 
-python ./attack/$attack.py $yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --epochs 0 --device cpu
+# TODO: make pratio, dataset and model variable
+python ./attack/$attack.py $yaml_conf --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --attack_target 0 --model resnet18 --dataset cifar10 --pratio 0.05 --epochs 0 --device cpu
