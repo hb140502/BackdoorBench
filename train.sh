@@ -1,6 +1,7 @@
 #!/bin/bash
 
-attack=$1
+. ./input_validation.sh
+input_validation $@
 
 repo_dir="$HOME/master-thesis/code/backdoorbench"
 my_dir="/vol/csedu-nobackup/project/hberendsen"
@@ -26,4 +27,4 @@ if [[ $attack != "prototype" ]]; then
 fi
 
 # TODO: make pratio, dataset and model variable
-python ./attack/$attack.py $yaml_conf $attack_opts --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --model resnet18 --dataset cifar10 --epochs 0 --device cpu
+python ./attack/$attack.py $yaml_conf $attack_opts --save_parent_dir "$record_dir" --save_folder_name $attack_id  --dataset_path="$data_dir" --model resnet18 --dataset cifar10 --epochs $n_epochs --device cpu
