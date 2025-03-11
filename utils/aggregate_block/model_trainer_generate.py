@@ -59,8 +59,8 @@ def generate_cls_model(
     logging.debug("image_size ONLY apply for vit!!!\nIf you use vit make sure you set the image size!")
 
     if model_name == 'resnet18':
-        from torchvision.models.resnet import resnet18
-        net = resnet18(num_classes=num_classes, **kwargs)
+        from models.resnet import ResNet18
+        net = ResNet18(num_classes=num_classes)
     elif model_name == 'preactresnet18':
         logging.debug('Make sure you want PreActResNet18, which is NOT resnet18.')
         from models.preact_resnet import PreActResNet18
