@@ -26,4 +26,3 @@ prefetch: False
 amp: False
 frequency_save: 0
 random_seed: 0
-epochs: 100
