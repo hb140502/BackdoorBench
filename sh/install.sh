@@ -13,24 +13,24 @@ pip install --no-cache-dir imageio==2.18.0
 pip install --no-cache-dir matplotlib==3.5.1
 pip install --no-cache-dir scipy==1.3.1
 
-# # for visualization only
-# pip install --no-cache-dir seaborn==0.11.2
-# ## Shapely Value
-# pip install --no-cache-dir shap==0.40.0
-# ## Grad-CAM
-# pip install --no-cache-dir grad-cam==1.3.9
-# ## Feature Map & Feature Visualization
-# pip install --no-cache-dir omnixai==1.2.3
-# pip install --no-cache-dir plotly==5.11.0
-# ## UMAP
-# pip install --no-cache-dir umap-learn==0.5.3
-# ## Network Structure
-# pip install --no-cache-dir graphviz
-# pip install --no-cache-dir hiddenlayer==0.3
-# pip install --no-cache-dir -U git+https://github.com/szagoruyko/pytorchviz.git@master
+# for visualization only
+pip install --no-cache-dir seaborn==0.11.2
+## Shapely Value
+pip install --no-cache-dir shap==0.40.0
+## Grad-CAM
+pip install --no-cache-dir grad-cam==1.3.9
+## Feature Map & Feature Visualization
+pip install --no-cache-dir omnixai==1.2.3
+pip install --no-cache-dir plotly==5.11.0
+## UMAP
+pip install --no-cache-dir umap-learn==0.5.3
+## Network Structure
+pip install --no-cache-dir graphviz
+pip install --no-cache-dir hiddenlayer==0.3
+pip install --no-cache-dir -U git+https://github.com/szagoruyko/pytorchviz.git@master
 
-# ## Landscape
-# pip install --no-cache-dir PyHessian==0.1
+## Landscape
+pip install --no-cache-dir PyHessian==0.1
 
 # ## Quality
 # pip install --no-cache-dir torchmetrics[image]

@@ -200,7 +200,7 @@ class prepro_cls_DatasetBD_v2(torch.utils.data.Dataset):
         :param full_dataset_without_transform: dataset without any transform. (just raw data)
 
         :param poison_indicator:
-            array with 0 or 1 at each position corresponding to clean/poisoned
+            array with 0/1/2 at each position corresponding to clean/poisoned/cross
             Must have the same len as given full_dataset_without_transform (default None, regarded as all 0s)
 
         :param bd_image_pre_transform:
@@ -250,7 +250,7 @@ class prepro_cls_DatasetBD_v2(torch.utils.data.Dataset):
                     selected_index, img, bd_label, label
                 )
 
-    def set_one_bd_sample(self, selected_index, img, bd_label, label):
+    def set_one_bd_sample(self, selected_index, img, bd_label, label, indicator=1):
 
         '''
         1. To pil image
@@ -264,6 +264,7 @@ class prepro_cls_DatasetBD_v2(torch.utils.data.Dataset):
         :param img: The converted img that want to put in the bd_container
         :param bd_label: The label bd_sample has
         :param label: The original label bd_sample has
+        :param indicator: Backdoor sample (1) or cross sample (2)
 
         '''
 
@@ -277,7 +278,7 @@ class prepro_cls_DatasetBD_v2(torch.utils.data.Dataset):
             value=(img, bd_label, label),
             relative_loc_to_save_folder_name=f"{label}",
         )
-        self.poison_indicator[selected_index] = 1
+        self.poison_indicator[selected_index] = indicator
 
     def __len__(self):
         return len(self.original_index_array)
@@ -291,9 +292,9 @@ class prepro_cls_DatasetBD_v2(torch.utils.data.Dataset):
             original_target = label
             poison_or_not = 0
         else:
-            # bd
+            # bd/cross
             img, label, original_target = self.bd_data_container[original_index]
-            poison_or_not = 1
+            poison_or_not = self.poison_indicator[original_index]
 
         if not isinstance(img, Image.Image):
             img = ToPILImage()(img)
