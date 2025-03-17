@@ -537,6 +537,7 @@ class Wanet(BadNet):
                         img=(t_img),
                         bd_label=int(target_changed[idx_in_batch]),
                         label=int(targets[idx_in_batch]),
+                        indicator=1 if idx_in_batch < num_bd else 2
                     )
 
         save_attack_result(
