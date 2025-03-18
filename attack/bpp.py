@@ -196,11 +196,8 @@ class ProbTransform(torch.nn.Module):
 class PostTensorTransform(torch.nn.Module):
     def __init__(self, args):
         super(PostTensorTransform, self).__init__()
-        self.random_crop = ProbTransform(
-            transforms.RandomCrop((args.input_height, args.input_width), padding=args.random_crop), p=0.8
-        )
-        self.random_rotation = ProbTransform(transforms.RandomRotation(args.random_rotation),
-                                             p=0.5)  # 50% random rotation
+        self.random_crop = transforms.RandomCrop((args.input_height, args.input_width), padding=args.random_crop)
+        # self.random_rotation = ProbTransform(transforms.RandomRotation(args.random_rotation), p=0.5)
         if args.dataset == "cifar10":
             self.random_horizontal_flip = transforms.RandomHorizontalFlip(p=0.5)
 
