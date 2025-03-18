@@ -32,7 +32,7 @@ pip install --no-cache-dir -U git+https://github.com/szagoruyko/pytorchviz.git@m
 ## Landscape
 pip install --no-cache-dir PyHessian==0.1
 
-# ## Quality
+## Quality
 pip install --no-cache-dir torchmetrics[image]
 
 pip install --no-cache-dir pytorch-wavelets
