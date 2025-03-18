@@ -67,8 +67,8 @@ import torch
 import torchvision.transforms as transforms
 
 import random
-# from numba import jit
-# from numba.types import float64, int64
+from numba import jit
+from numba.types import float64, int64
 
 from utils.aggregate_block.dataset_and_transform_generate import get_dataset_normalization, get_dataset_denormalization
 from utils.aggregate_block.model_trainer_generate import generate_cls_model
@@ -154,12 +154,12 @@ def np_4d_to_tensor(inputs, args):
     return inputs_clone
 
 
-# @jit(float64[:](float64[:], int64, float64[:]), nopython=True)
+@jit(float64[:](float64[:], int64, float64[:]), nopython=True)
 def rnd1(x, decimals, out):
     return np.round_(x, decimals, out)
 
 
-# @jit(nopython=True)
+@jit(nopython=True)
 def floydDitherspeed(image, squeeze_num):
     channel, h, w = image.shape
     for y in range(h):
@@ -196,11 +196,8 @@ class ProbTransform(torch.nn.Module):
 class PostTensorTransform(torch.nn.Module):
     def __init__(self, args):
         super(PostTensorTransform, self).__init__()
-        self.random_crop = ProbTransform(
-            transforms.RandomCrop((args.input_height, args.input_width), padding=args.random_crop), p=0.8
-        )
-        self.random_rotation = ProbTransform(transforms.RandomRotation(args.random_rotation),
-                                             p=0.5)  # 50% random rotation
+        self.random_crop = transforms.RandomCrop((args.input_height, args.input_width), padding=args.random_crop)
+        # self.random_rotation = ProbTransform(transforms.RandomRotation(args.random_rotation), p=0.5)
         if args.dataset == "cifar10":
             self.random_horizontal_flip = transforms.RandomHorizontalFlip(p=0.5)
 
