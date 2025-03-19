@@ -386,15 +386,15 @@ class Bpp(BadNet):
                 bs = args.batch_size
                 inputs_bd = torch.round(denormalizer(inputs) * 255)
                 inputs = denormalizer(inputs)
-                # save clean
-                for idx_in_batch, t_img in enumerate(inputs.detach().clone().cpu()):
-                    self.clean_train_dataset.set_one_bd_sample(
-                        selected_index=int(batch_idx * bs + idx_in_batch),
-                        # manually calculate the original index, since we do not shuffle the dataloader
-                        img=(t_img),
-                        bd_label=int(targets[idx_in_batch]),
-                        label=int(targets[idx_in_batch]),
-                    )
+                # # save clean
+                # for idx_in_batch, t_img in enumerate(inputs.detach().clone().cpu()):
+                #     self.clean_train_dataset.set_one_bd_sample(
+                #         selected_index=int(batch_idx * bs + idx_in_batch),
+                #         # manually calculate the original index, since we do not shuffle the dataloader
+                #         img=(t_img),
+                #         bd_label=int(targets[idx_in_batch]),
+                #         label=int(targets[idx_in_batch]),
+                #     )
 
 
                 if args.dithering:
@@ -452,15 +452,15 @@ class Bpp(BadNet):
                 bs = inputs.shape[0]
                 inputs_bd = torch.round(denormalizer(inputs) * 255)
                 inputs = denormalizer(inputs)
-                # save clean
-                for idx_in_batch, t_img in enumerate(inputs.detach().clone().cpu()):
-                    self.clean_test_dataset.set_one_bd_sample(
-                        selected_index=int(batch_idx * int(args.batch_size) + idx_in_batch),
-                        # manually calculate the original index, since we do not shuffle the dataloader
-                        img=(t_img),
-                        bd_label=int(targets[idx_in_batch]),
-                        label=int(targets[idx_in_batch]),
-                    )
+                # # save clean
+                # for idx_in_batch, t_img in enumerate(inputs.detach().clone().cpu()):
+                #     self.clean_test_dataset.set_one_bd_sample(
+                #         selected_index=int(batch_idx * int(args.batch_size) + idx_in_batch),
+                #         # manually calculate the original index, since we do not shuffle the dataloader
+                #         img=(t_img),
+                #         bd_label=int(targets[idx_in_batch]),
+                #         label=int(targets[idx_in_batch]),
+                #     )
 
                 # Evaluate Backdoor
                 if args.dithering:
