@@ -9,21 +9,12 @@ data_dir="$my_dir/data"
 record_dir="$my_dir/record"
 timestamp=$(date +"T%d-%m_%H-%M")
 
-<<<<<<< HEAD
 gpu=$(python get_gpu.py)
 
 if [[ ! $gpu =~ "RTX 2080 Ti" ]]; then
     echo "Unexpected GPU: ${gpu}"
     exit 1
 fi
-=======
-# gpu=$(python get_gpu.py)
-
-# if [[ ! $gpu =~ "RTX 2080 Ti" ]]; then
-#     echo "Unexpected GPU: ${gpu}"
-#     exit 1
-# fi
->>>>>>> local
 
 pratio_label=$(echo p$pratio | tr . -)
 attack_id="${attack}_${model}_${dataset}_${pratio_label}"
