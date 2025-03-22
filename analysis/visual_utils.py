@@ -365,11 +365,13 @@ def generate_mix_dataset(bd_test, target_class, pratio, selected_classes, max_nu
 
 
 def load_prototype_result(args, save_path_attack):
+    args.dataset_path = f"{args.dataset_path}/{args.dataset}"
+
     result_prototype = {}
     result_prototype['model_name'] = args.model
     result_prototype['num_classes'] = args.num_classes
     result_prototype['model'] = torch.load(save_path_attack + "/clean_model.pth")
-    result_prototype['data_path'] =  args.dataset_path + "/" + args.dataset
+    result_prototype['data_path'] =  args.dataset_path
     result_prototype['img_size'] = args.img_size = (args.input_height, args.input_width, args.input_channel)
     
     train_dataset_without_transform, \
