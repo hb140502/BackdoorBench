@@ -12,10 +12,10 @@ from time import time
 from copy import deepcopy
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 from utils.prefetch import PrefetchLoader, prefetch_transform
 from utils.bd_dataset import prepro_cls_DatasetBD
+
 
 def seed_worker(worker_id):
     worker_seed = torch.initial_seed() % 2**32
@@ -126,6 +126,7 @@ class ModelTrainerCLS():
         self.criterion = criterion
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
 
         if continue_training_path is not None:
             logging.info(f"No batch info will be used. Cannot continue from specific batch!")
@@ -142,7 +143,8 @@ class ModelTrainerCLS():
             pformat(f"self.amp:{self.amp}," +
                     f"self.criterion:{self.criterion}," +
                     f"self.optimizer:{self.optimizer}," +
-                    f"self.scheduler:{self.scheduler.state_dict() if self.scheduler is not None else None},")
+                    f"self.scheduler:{self.scheduler.state_dict() if self.scheduler is not None else None}," +
+                    f"self.scaler:{self.scaler.state_dict() if self.scaler is not None else None})")
         )
     def get_model_params(self):
         return self.model.cpu().state_dict()
@@ -173,6 +175,7 @@ class ModelTrainerCLS():
             'optimizer_state_dict': self.optimizer.state_dict(),
             'scheduler_state_dict': self.scheduler.state_dict() if self.scheduler is not None else None,
             'criterion_state_dict': self.criterion.state_dict(),
+            "scaler": self.scaler.state_dict(),
         } \
             if only_model_state_dict == False else self.get_model_params()
 
@@ -234,6 +237,11 @@ class ModelTrainerCLS():
                 self.criterion.load_state_dict(
                     load_dict['criterion_state_dict']
                 )
+                if 'scaler' in load_dict:
+                    self.scaler.load_state_dict(
+                        load_dict["scaler"]
+                    )
+                    logging.info(f'load scaler done. scaler={load_dict["scaler"]}')
                 logging.info('all state load successful')
                 return load_dict['epoch_num_when_save'], load_dict['batch_num_when_save']
             else:
@@ -295,10 +303,12 @@ class ModelTrainerCLS():
 
         x, labels = x.to(device, non_blocking = True), labels.to(device, non_blocking = True)
 
-        log_probs = self.model(x)
-        loss = self.criterion(log_probs, labels.long())
-        loss.backward()
-        self.optimizer.step()
+        with torch.cuda.amp.autocast(enabled=self.amp):
+            log_probs = self.model(x)
+            loss = self.criterion(log_probs, labels.long())
+        self.scaler.scale(loss).backward()
+        self.scaler.step(self.optimizer)
+        self.scaler.update()
         self.optimizer.zero_grad()
 
         batch_loss = loss.item() * labels.size(0)
@@ -977,6 +987,7 @@ class ModelTrainerCLS_v2():
         self.scheduler = scheduler
         self.device = device
         self.amp = amp
+        self.scaler = torch.cuda.amp.GradScaler(enabled=self.amp)
         self.non_blocking = non_blocking
 
         self.frequency_save = frequency_save
@@ -1022,7 +1033,8 @@ class ModelTrainerCLS_v2():
                 f"self.amp:{self.amp}," +
                 f"self.criterion:{self.criterion}," +
                 f"self.optimizer:{self.optimizer}," +
-                f"self.scheduler:{self.scheduler.state_dict() if self.scheduler is not None else None},"
+                f"self.scheduler:{self.scheduler.state_dict() if self.scheduler is not None else None}," +
+                f"self.scaler:{self.scaler.state_dict() if self.scaler is not None else None})"
             )
         )
 
@@ -1080,6 +1092,7 @@ class ModelTrainerCLS_v2():
             )
             for name, test_dataset in test_dataset_dict.items()
         }
+
         self.set_with_dataloader(
             train_dataloader = train_dataloader,
             test_dataloader_dict = test_dataloader_dict,
@@ -1134,18 +1147,26 @@ class ModelTrainerCLS_v2():
             logging.warning("No enough batch loss to get the one epoch loss")
 
     def one_forward_backward(self, x, labels, device, verbose=0):
+
         self.model.train()
         self.model.to(device, non_blocking=self.non_blocking)
+
         x, labels = x.to(device, non_blocking=self.non_blocking), labels.to(device, non_blocking=self.non_blocking)
-        log_probs = self.model(x)
-        loss = self.criterion(log_probs, labels.long())
-        loss.backward()
-        self.optimizer.step()
+
+        with torch.cuda.amp.autocast(enabled=self.amp):
+            log_probs = self.model(x)
+            loss = self.criterion(log_probs, labels.long())
+        self.scaler.scale(loss).backward()
+        self.scaler.step(self.optimizer)
+        self.scaler.update()
         self.optimizer.zero_grad()
+
         batch_loss = loss.item()
+
         if verbose == 1:
             batch_predict = torch.max(log_probs, -1)[1].detach().clone().cpu()
             return batch_loss, batch_predict
+
         return batch_loss, None
 
     def train(self, epochs = 0, batchs = 0):
@@ -1252,6 +1273,7 @@ class ModelTrainerCLS_v2():
                                    prefetch_transform_attr_name,
                                    non_blocking,
                                    ):
+
         self.set_with_dataloader(
             train_dataloader,
             test_dataloader_dict,
@@ -1333,6 +1355,7 @@ class ModelTrainerCLS_v2():
             'optimizer_state_dict': self.optimizer.state_dict(),
             'scheduler_state_dict': self.scheduler.state_dict() if self.scheduler is not None else None,
             'criterion_state_dict': self.criterion.state_dict(),
+            "scaler": self.scaler.state_dict(),
         } \
             if only_model_state_dict == False else self.get_model_params()
 
@@ -1442,7 +1465,7 @@ class PureCleanModelTrainer(ModelTrainerCLS_v2):
             batch_poison_indicator_list = []
             batch_original_targets_list = []
 
-        for batch_idx in tqdm(range(self.batch_num_per_epoch), desc="Training one epoch on mix..."):
+        for batch_idx in range(self.batch_num_per_epoch):
             x, labels, original_index, poison_indicator, original_targets  = self.get_one_batch()
             one_batch_loss, batch_predict = self.one_forward_backward(x, labels, self.device, verbose)
             batch_loss_list.append(one_batch_loss)
@@ -1557,6 +1580,7 @@ class PureCleanModelTrainer(ModelTrainerCLS_v2):
                 "clean_test_dataloader":clean_test_dataloader,
                 "bd_test_dataloader":bd_test_dataloader,
             }
+
         self.set_with_dataloader(
             train_dataloader,
             test_dataloader_dict,
@@ -1752,7 +1776,7 @@ class BackdoorModelTrainer(ModelTrainerCLS_v2):
             batch_poison_indicator_list = []
             batch_original_targets_list = []
 
-        for batch_idx in tqdm(range(self.batch_num_per_epoch), desc="Training one epoch on mix..."):
+        for batch_idx in range(self.batch_num_per_epoch):
             x, labels, original_index, poison_indicator, original_targets  = self.get_one_batch()
             one_batch_loss, batch_predict = self.one_forward_backward(x, labels, self.device, verbose)
             batch_loss_list.append(one_batch_loss)
@@ -1867,6 +1891,7 @@ class BackdoorModelTrainer(ModelTrainerCLS_v2):
                 "clean_test_dataloader":clean_test_dataloader,
                 "bd_test_dataloader":bd_test_dataloader,
             }
+
         self.set_with_dataloader(
             train_dataloader,
             test_dataloader_dict,
@@ -1896,12 +1921,14 @@ class BackdoorModelTrainer(ModelTrainerCLS_v2):
         test_ra_list = []
 
         for epoch in range(total_epoch_num):
+
             train_epoch_loss_avg_over_batch, \
             train_epoch_predict_list, \
             train_epoch_label_list, \
             train_epoch_original_index_list, \
             train_epoch_poison_indicator_list, \
             train_epoch_original_targets_list = self.train_one_epoch_on_mix(verbose=1)
+
             train_mix_acc = all_acc(train_epoch_predict_list, train_epoch_label_list)
 
             train_bd_idx = torch.where(train_epoch_poison_indicator_list == 1)[0]

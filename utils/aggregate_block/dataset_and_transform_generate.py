@@ -139,7 +139,7 @@ def get_transform(dataset_name, input_height, input_width, train=True, random_cr
         transforms_list.append(transforms.Resize((input_height, input_width)))
         if train:
             transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
-            # transforms_list.append(transforms.RandomRotation(10))
+            transforms_list.append(transforms.RandomRotation(10))
             if dataset_name == "cifar10":
                 transforms_list.append(transforms.RandomHorizontalFlip())
 

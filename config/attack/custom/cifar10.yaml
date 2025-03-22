@@ -3,7 +3,7 @@ device: cuda:0
 
 # Data
 dataset_path: ./data
-batch_size: 128
+batch_size: 100
 
 # Optimizer
 lr: 0.01
@@ -19,7 +19,7 @@ steplr_milestones:
 steplr_gamma: 0.1
 
 # Misc
-num_workers: 4
+num_workers: 2
 pin_memory: True
 non_blocking: True
 prefetch: False
