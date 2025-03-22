@@ -1,7 +1,7 @@
 attack: bpp
 attack_label_trans: all2one
-neg_ratio: 0.1
 random_rotation: 10
 random_crop: 4
 squeeze_num: 32   # squeeze number of the original image is 256
 dithering: True
+# neg_ratio: same as poison ratio (see train.sh)
