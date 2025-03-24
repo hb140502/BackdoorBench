@@ -535,6 +535,7 @@ class Bpp(BadNet):
                             img=(t_img),
                             bd_label=int(targets[idx_in_batch]),
                             label=int(targets[idx_in_batch]),
+                            indicator=2
                         )
 
 
@@ -845,6 +846,7 @@ class Bpp(BadNet):
             clean_data=args.dataset,
             bd_train=self.bd_train_dataset_save,
             bd_test=self.bd_test_r_dataset,
+            cross_test=self.cross_test_dataset,
             save_path=args.save_path,
         )
         print("done")
