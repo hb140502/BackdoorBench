@@ -325,6 +325,7 @@ class Wanet(BadNet):
                             img=(t_img),
                             bd_label=int(targets[idx_in_batch]),
                             label=int(targets[idx_in_batch]),
+                            indicator=2
                         )
 
         bd_test_dataset_with_transform = dataset_wrapper_with_transform(
@@ -547,6 +548,7 @@ class Wanet(BadNet):
             clean_data=args.dataset,
             bd_train=bd_train_dataset,
             bd_test=self.bd_test_dataset,
+            cross_test=self.cross_test_dataset,
             save_path=args.save_path,
         )
 

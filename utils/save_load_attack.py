@@ -106,6 +106,7 @@ def save_attack_result(
     bd_test : prepro_cls_DatasetBD_v2, # MUST be dataset without transform
     save_path : str,
     bd_train : Optional[prepro_cls_DatasetBD_v2] = None, # MUST be dataset without transform
+    cross_test : Optional[prepro_cls_DatasetBD_v2] = None, # MUST be dataset without transform
     **kwargs,
 ):
     '''
@@ -122,7 +123,8 @@ def save_attack_result(
     :param img_size : list, like [32,32,3]
     :param clean_data : str, clean dataset name
     :param bd_train : torch.utils.data.Dataset, # dataset without transform !!
-    :param bd_test : torch.utils.data.Dataset, # dataset without transform
+    :param bd_test : torch.utils.data.Dataset, # dataset without transform !!
+    :param cross_test : torch.utils.data.Dataset, # dataset without transform !!
     :param save_path : str,
     '''
 
@@ -135,6 +137,7 @@ def save_attack_result(
             'clean_data': clean_data,
             'bd_train': bd_train.retrieve_state() if bd_train is not None else None,
             'bd_test': bd_test.retrieve_state(),
+            'cross_test': cross_test.retrieve_state() if cross_test is not None else None,
             **kwargs,
         }
 
@@ -206,6 +209,7 @@ def load_attack_result(
         'clean_data',
         'bd_train',
         'bd_test',
+        'cross_test',
         ]):
 
         logging.info('key match for attack_result, processing...')
@@ -258,6 +262,19 @@ def load_attack_result(
             logging.info("No bd_train info found.")
             bd_train_dataset_with_transform = None
 
+        if load_file['cross_test'] is not None:
+            cross_test_dataset = prepro_cls_DatasetBD_v2(test_dataset_without_transform)
+            cross_test_dataset.set_state(
+                load_file['cross_test']
+            )
+            cross_test_dataset_with_transform = dataset_wrapper_with_transform(
+                cross_test_dataset,
+                test_img_transform,
+                test_label_transform,
+            )
+        else:
+            logging.info("No cross_test info found.")
+            cross_test_dataset_with_transform = None
 
         bd_test_dataset = prepro_cls_DatasetBD_v2(test_dataset_without_transform)
         bd_test_dataset.set_state(
@@ -293,6 +310,7 @@ def load_attack_result(
                 'clean_test' : clean_test_dataset_with_transform,
                 'bd_train': bd_train_dataset_with_transform,
                 'bd_test': bd_test_dataset_with_transform,
+                'cross_test': cross_test_dataset_with_transform,
             }
 
         print(f"loading...")
