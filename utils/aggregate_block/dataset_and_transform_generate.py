@@ -231,7 +231,8 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             cifar10_h_flip = [transforms.RandomHorizontalFlip()] if args.dataset == "cifar10" else []
             pre_trigger_train_transform_list = [
                 transforms.Resize(args.img_size[:2]),
-                transforms.RandomCrop(args.img_size[:2], padding=4)
+                transforms.RandomCrop(args.img_size[:2], padding=4),
+                transforms.RandomRotation(10)
             ] + cifar10_h_flip
             pre_trigger_train_transform = transforms.Compose(pre_trigger_train_transform_list)
             pre_trigger_test_transform = transforms.Resize(args.img_size[:2])
