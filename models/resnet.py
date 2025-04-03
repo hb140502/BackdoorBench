@@ -111,6 +111,22 @@ class ResNet(nn.Module):
             return preds, features
         else:
             return preds
+    
+    def forward_all_features(self, x):
+        features = []
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.layer1(out)
+        features.append(out)
+        out = self.layer2(out)
+        features.append(out)
+        out = self.layer3(out)
+        features.append(out)
+        out = self.layer4(out)
+        features.append(out)
+        out = F.avg_pool2d(out, 4)
+        out = out.view(out.size(0), -1)
+        out = self.linear(out)
+        return out, features
 
 
 def ResNet18(num_classes=10):
