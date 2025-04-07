@@ -10,6 +10,7 @@ Note:
 - This file is added to BackdoorBench to replace the torchvision ResNet18 implementation because it results in better model performance.
 - A small adjustment is made to the forward method of the ResNet class to allow the model features to be extracted.
 - The parameter num_classes is added to the ResNet18 function to allow the amount of classes to be configured.
+- F.avg_pool2d is replaced with F.adaptive_avg_pool2d to make this ResNet implementation also work with image size 64x64.
 '''
 import torch
 import torch.nn as nn
@@ -103,7 +104,7 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
-        out = F.avg_pool2d(out, 4)
+        out = F.adaptive_avg_pool2d(out, (1,1))
         features = out.view(out.size(0), -1)
         preds = self.linear(features)
 
@@ -123,7 +124,7 @@ class ResNet(nn.Module):
         features.append(out)
         out = self.layer4(out)
         features.append(out)
-        out = F.avg_pool2d(out, 4)
+        out = F.adaptive_avg_pool2d(out, (1,1))
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out, features
