@@ -29,6 +29,16 @@ function get_badnet_trigger() {
     fi
 }
 
+function get_blend_trigger() {
+    path_to_trigger="./resource/blended"
+
+    if [[ $dataset == "tiny" ]]; then
+        echo "$path_to_trigger/hellokitty_64.png"
+    else
+        echo "$path_to_trigger/hellokitty_32.png"
+    fi
+}
+
 # Add additional attack-specific configuration unless attack == prototype (clean model)
 if [[ $attack != "prototype" ]]; then
     yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
@@ -37,6 +47,8 @@ if [[ $attack != "prototype" ]]; then
 
     if [[ $attack == "badnet" ]]; then
         attack_opts="$attack_opts --patch_mask_path $(get_badnet_trigger)"
+    elif [[ $attack == "blended" ]]; then
+        attack_opts="$attack_opts --attack_trigger_img_path $(get_blend_trigger)"
     elif [[ $attack == "bpp" ]]; then
         attack_opts="$attack_opts --neg_ratio $pratio"
     fi
