@@ -1,16 +1,15 @@
 '''ResNet in PyTorch.
 
-For Pre-activation ResNet, see 'preact_resnet.py'.
-
 Reference:
 [1] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
     Deep Residual Learning for Image Recognition. arXiv:1512.03385
 
 Note: 
-- This file is added to BackdoorBench to replace the torchvision ResNet18 implementation because it results in better model performance.
 - A small adjustment is made to the forward method of the ResNet class to allow the model features to be extracted.
 - The parameter num_classes is added to the ResNet18 function to allow the amount of classes to be configured.
 - F.avg_pool2d is replaced with F.adaptive_avg_pool2d to make this ResNet implementation also work with image size 64x64.
+- The forward_all_features method is added so that this file can be used with the Grond attack.
+- The custom_forward method and model aliases are added so that this file can be used with the DFST attack.
 '''
 import torch
 import torch.nn as nn
@@ -128,6 +127,24 @@ class ResNet(nn.Module):
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out, features
+    
+    def custom_forward(self, x):
+        activation = {}
+        out = F.relu(self.bn1(self.conv1(x)))
+        activation['pre-extract'] = out
+        out = self.layer1(out)
+        activation['layer1'] = out
+        out = self.layer2(out)
+        activation['layer2'] = out
+        out = self.layer3(out)
+        activation['layer3'] = out
+        out = self.layer4(out)
+        activation['layer4'] = out
+        out = F.adaptive_avg_pool2d(out, (1,1))
+        pre_out = out.view(out.size(0), -1)
+        activation['post-extract'] = pre_out
+        final = self.linear(pre_out)
+        return final, activation
 
 
 def ResNet18(num_classes=10):
@@ -149,10 +166,14 @@ def ResNet101():
 def ResNet152():
     return ResNet(Bottleneck, [3, 8, 36, 3])
 
-
 def test():
     net = ResNet18()
     y = net(torch.randn(1, 3, 32, 32))
     print(y.size())
 
-# test()
+# Aliases used in DFST attack
+resnet18 = ResNet18
+resnet34 = ResNet34
+resnet50 = ResNet50
+resnet101 = ResNet101
+resnet152 = ResNet152
