@@ -23,9 +23,9 @@ yaml_conf="--yaml_path config/attack/custom/cifar10.yaml"
 
 function get_badnet_trigger() {
     if [[ $dataset == "tiny" ]]; then
-        echo "./resource/badnet/white_square_64.png"
+        echo "./resource/badnet/badnet_patch_64.png"
     else
-        echo "./resource/badnet/white_square_32.png"
+        echo "./resource/badnet/badnet_patch_32.png"
     fi
 }
 
