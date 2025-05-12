@@ -6,7 +6,7 @@ The white square image is used to generate the white square attack in the paper.
 
 If you want to draw more complicated shapes, you can modify the code in `generate_white_square.py` or first generate a black image then stamp the trigger onto it and convert the image to npy file.
 
-The last step is to specify the parameter `--patch_mask_path` for `badnet.py`.
+The last step is to specify the parameter `--patch_path` for `badnet.py`.
 
 ### `generate_grid.py`
 

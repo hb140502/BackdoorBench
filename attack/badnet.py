@@ -85,7 +85,7 @@ class BadNet(NormalCase):
             attack_label_trans (str): which type of label modification in backdoor attack
             pratio (float): the poison rate
             bd_yaml_path (string): path for yaml file provide additional default attributes
-            patch_mask_path (string): path for patch mask
+            patch_path (string): path for patch mask
             **kwargs (optional): Additional attributes.
 
         """
@@ -96,7 +96,8 @@ class BadNet(NormalCase):
     def set_bd_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         parser = add_common_attack_args(parser)
 
-        parser.add_argument("--patch_mask_path", type=str)
+        parser.add_argument("--patch_path", type=str)
+        parser.add_argument("--mask_path", type=str, default=None)
         parser.add_argument('--bd_yaml_path', type=str, default='./config/attack/badnet/default.yaml',
                             help='path for yaml file provide additional default attributes')
         return parser

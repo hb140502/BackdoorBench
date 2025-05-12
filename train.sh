@@ -29,6 +29,14 @@ function get_badnet_trigger() {
     fi
 }
 
+function get_badnet_mask() {
+    if [[ $dataset == "tiny" ]]; then
+        echo "./resource/badnet/white_square_64.png"
+    else
+        echo "./resource/badnet/white_square_32.png"
+    fi
+}
+
 function get_blend_trigger() {
     path_to_trigger="./resource/blended"
 
@@ -42,11 +50,10 @@ function get_blend_trigger() {
 # Add additional attack-specific configuration unless attack == prototype (clean model)
 if [[ $attack != "prototype" ]]; then
     yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
-    # TODO: change target class based on dataset
     attack_opts="--attack_target 0 --pratio $pratio"
 
     if [[ $attack == "badnet" ]]; then
-        attack_opts="$attack_opts --patch_mask_path $(get_badnet_trigger)"
+        attack_opts="$attack_opts --patch_path $(get_badnet_trigger) --mask_path $(get_badnet_mask)"
     elif [[ $attack == "blended" ]]; then
         attack_opts="$attack_opts --attack_trigger_img_path $(get_blend_trigger)"
     elif [[ $attack == "bpp" ]]; then

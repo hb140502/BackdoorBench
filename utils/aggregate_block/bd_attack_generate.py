@@ -58,8 +58,15 @@ def bd_attack_img_trans_generate(args):
             np.array,
         ])
 
+        # Use dedicated mask to apply patch if specified, otherwise just use the patch itself as the mask (default BackdoorBench functionality)
+        if args.mask_path:
+            mask = args.mask_path
+        else:
+            mask = args.patch_path
+
         bd_transform = AddMaskPatchTrigger(
-            trans(Image.open(args.patch_mask_path)),
+            trans(Image.open(args.patch_path)),
+            trans(Image.open(mask)),
         )
 
         train_bd_transform = general_compose([

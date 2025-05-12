@@ -7,7 +7,7 @@ class Args:
 args = Args()
 args.__dict__ = {
     'attack':"badnet",
-    "patch_mask_path" : "../resource/badnet/bottom_right_3by3_white.npy",
+    "patch_path" : "../resource/badnet/bottom_right_3by3_white.npy",
     "img_size" : [224,224,3],
 }
 

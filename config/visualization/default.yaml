@@ -15,6 +15,6 @@ random_seed: 0
 sgd_momentum: 0.9
 wd: 0.0005
 attack: badnet
-patch_mask_path: ../resource/badnet/bottom_right_3by3_white.npy
+patch_path: ../resource/badnet/bottom_right_3by3_white.npy
 epochs: 100
 result_file_defense: None

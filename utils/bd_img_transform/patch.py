@@ -37,14 +37,16 @@ class AddPatchTrigger(object):
 class AddMaskPatchTrigger(object):
     def __init__(self,
                  trigger_array : Union[np.ndarray, torch.Tensor],
+                 mask_array : Union[np.ndarray, torch.Tensor],
                  ):
         self.trigger_array = trigger_array
+        self.mask_array = mask_array
 
     def __call__(self, img, target = None, image_serial_id = None):
         return self.add_trigger(img)
 
     def add_trigger(self, img):
-        return img * (self.trigger_array == 0) + self.trigger_array * (self.trigger_array > 0)
+        return img * (self.mask_array == 0) + self.trigger_array * (self.mask_array > 0)
 
 class SimpleAdditiveTrigger(object):
     '''
