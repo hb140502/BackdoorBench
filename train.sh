@@ -82,4 +82,4 @@ if [ $attack == "bpp" ]; then
     cd ..
 fi
     
-tar -cf "${attack_id}_${timestamp}.tar" $attack_id && rm -rf $attack_id
+tar -cf "${attack_id}_${timestamp}.tar" $attack_id
