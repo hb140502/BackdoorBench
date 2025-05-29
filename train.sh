@@ -9,6 +9,9 @@ data_dir="$my_dir/data"
 record_dir="$my_dir/record"
 timestamp=$(date +"T%d-%m_%H-%M")
 
+# pyenv activate bb
+source /vol/csedu-nobackup/project/hberendsen/.pyenv/versions/bb/bin/activate
+
 gpu=$(python get_gpu.py)
 
 if [[ ! $gpu =~ "RTX 2080 Ti" ]]; then
