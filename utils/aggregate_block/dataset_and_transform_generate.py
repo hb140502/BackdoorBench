@@ -90,7 +90,9 @@ def get_dataset_normalization(dataset_name):
         dataset_normalization = (transforms.Normalize([0.5], [0.5]))
     elif dataset_name == 'tiny':
         dataset_normalization = (transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262]))
-    elif dataset_name == "gtsrb" or dataset_name == "celeba":
+    elif dataset_name == "gtsrb":
+        dataset_normalization = transforms.Normalize((0.3337, 0.3064, 0.3171), (0.2672, 0.2564, 0.2629))
+    elif dataset_name == "celeba":
         dataset_normalization = transforms.Normalize([0, 0, 0], [1, 1, 1])
     elif dataset_name == 'imagenet':
         dataset_normalization = (
