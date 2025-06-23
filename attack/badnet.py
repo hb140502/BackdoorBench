@@ -137,6 +137,7 @@ class BadNet(NormalCase):
             train=True,
             pratio=args.pratio if 'pratio' in args.__dict__ else None,
             p_num=args.p_num if 'p_num' in args.__dict__ else None,
+            clean_label=args.attack == 'narcissus'
         )
 
         logging.debug(f"poison train idx is saved")
