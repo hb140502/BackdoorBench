@@ -1,24 +1,24 @@
-# ======================================== narcissus_train ========================================
-# TODO: change to Narcissus, add link to official implementation and place license at end of file, like in WaNet
 '''
-Targeted backdoor attacks on deep learning systems using data poisoning
-this script is for blended attack
+Narcissus: A Practical Clean-Label Backdoor Attack with Limited Information
+This file is modified based on the following source:
 
-@article{Blended,
-	title        = {Targeted Backdoor Attacks on Deep Learning Systems Using Data Poisoning},
-	author       = {Xinyun Chen and Chang Liu and Bo Li and Kimberly Lu and Dawn Song},
-	journal      = {arXiv prelogging.info arXiv:1712.05526},
-	year         = {2017}
+link : https://github.com/reds-lab/Narcissus
+The original license is placed at the end of this file.
+
+@inproceedings{
+    10.1145/3576915.3616617,
+    author = {Zeng, Yi and Pan, Minzhou and Just, Hoang Anh and Lyu, Lingjuan and Qiu, Meikang and Jia, Ruoxi},
+    title = {Narcissus: A Practical Clean-Label Backdoor Attack with Limited Information},
+    year = {2023},
+    url = {https://doi.org/10.1145/3576915.3616617},
+    booktitle = {Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security},
 }
-basic structure:
-1. config args, save_path, fix random seed
-2. set the clean train data and clean test data
-3. set the attack img transform and label transform
-4. set the backdoor attack data and backdoor test data
-5. set the device, model, criterion, optimizer, training schedule.
-6. save the attack result for defense
 
+
+
+The original license is placed at the end of this file.
 '''
+
 import argparse
 import logging
 import matplotlib.pyplot as plt
@@ -36,31 +36,15 @@ from utils.aggregate_block.dataset_and_transform_generate import get_num_classes
 from utils.bd_dataset_v2 import dataset_wrapper_with_transform
 
 class Narcissus(BadNet):
-    # TODO: change to Narcissus
-    r'''Targeted Backdoor Attacks on Deep Learning Systems Using Data Poisoning
-
-        basic structure:
-
-        1. config args, save_path, fix random seed
-        2. set the clean train data and clean test data
-        3. set the attack img transform and label transform
-        4. set the backdoor attack data and backdoor test data
-        5. set the device, model, criterion, optimizer, training schedule.
-        6. attack or use the model to do finetune with 5% clean data
-        7. save the attack result for defense
-
-        .. code-block:: python
-
-            attack = Blended()
-            attack.attack()
+    r'''Narcissus: A Practical Clean-Label Backdoor Attack with Limited Information
 
         .. Note::
-            @article{Blended,
-                title        = {Targeted Backdoor Attacks on Deep Learning Systems Using Data Poisoning},
-                author       = {Xinyun Chen and Chang Liu and Bo Li and Kimberly Lu and Dawn Song},
-                journal      = {arXiv prelogging.info arXiv:1712.05526},
-                year         = {2017}
-            }
+            @inproceedings{10.1145/3576915.3616617,
+            author = {Zeng, Yi and Pan, Minzhou and Just, Hoang Anh and Lyu, Lingjuan and Qiu, Meikang and Jia, Ruoxi},
+            title = {Narcissus: A Practical Clean-Label Backdoor Attack with Limited Information},
+            year = {2023},
+            url = {https://doi.org/10.1145/3576915.3616617},
+            booktitle = {Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security}}
 
         Args:
             attack (string): name of attack, use to match the transform and set the saving prefix of path.
@@ -68,22 +52,24 @@ class Narcissus(BadNet):
             attack_label_trans (str): which type of label modification in backdoor attack
             pratio (float): the poison rate
             bd_yaml_path (string): path for yaml file provide additional default attributes
-            attack_trigger_img_path (string): path for trigger image
-            attack_train_blended_alpha (float): alpha for blended attack, for train dataset
-            attack_test_blended_alpha  (float): alpha for blended attack, for test dataset
+            attack_trigger_path (string): path for Narcissus trigger if one already exists
+            test_magnifier (int): trigger is multiplied by this factor at inference time
+            surrogate_model_path (string): path to surrogate model used to generate trigger
+            pood_dataset (string): name of public out-of-distribution (POOD) dataset on which surrogate model was trained
+            epsilon (int): maximum perturbation of trigger, measured with the l_infinity norm
             **kwargs (optional): Additional attributes.
 
         '''
 
     def set_bd_args(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         parser = add_common_attack_args(parser)
-        parser.add_argument('--attack_trigger_path', type=str, default="")
         parser.add_argument('--bd_yaml_path', type=str, default='./config/attack/narcissus/default.yaml',
                             help='path for yaml file provide additional default attributes')
-        parser.add_argument('--pood_dataset', type=str, default=None, help='name of public out-of-distribution (POOD) dataset')
-        parser.add_argument('--surrogate_model_path', type=str, default=None, help='path to backdoorbench prototype model trained on POOD dataset')
-        parser.add_argument('--epsilon', type=str, help='Each dimension of the trigger should be within the interval [-epsilon, +epsilon]')
+        parser.add_argument('--attack_trigger_path', type=str, default="")
         parser.add_argument('--test_magnifier', type=str, help='Factor to magnify the trigger by at inference time')
+        parser.add_argument('--surrogate_model_path', type=str, default=None, help='path to backdoorbench prototype model trained on POOD dataset')
+        parser.add_argument('--pood_dataset', type=str, default=None, help='name of public out-of-distribution (POOD) dataset')
+        parser.add_argument('--epsilon', type=str, help='Each dimension of the trigger should be within the interval [-epsilon, +epsilon]')
         return parser
     
     def get_target_dataloader(self, normalize=True):
@@ -255,4 +241,28 @@ if __name__ == '__main__':
 
     # Step 4: Test Query Manipulation
     attack.stage2_training()
-    
+
+'''
+MIT License
+
+Copyright (c) 2022 ReDS Lab
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+'''
