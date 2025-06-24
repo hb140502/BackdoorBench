@@ -122,11 +122,16 @@ class Narcissus(BadNet):
         assert img_size == args.img_size, "POOD dataset and target dataset should have same image size"
         poi_warm_up_model = generate_cls_model(args.model, num_classes, img_size[0]).to(args.device)
 
-        # Load state dict of surrogate model, add zero weights and bias for target class in linear layer
+        # Load state dict of surrogate model
         state_dict = torch.load(os.path.join(args.surrogate_model_path, "clean_model.pth"))
-        state_dict["linear.bias"] = torch.cat([state_dict["linear.bias"], torch.zeros(1)])
-        weights_per_class = state_dict["linear.weight"].shape[1]
-        state_dict["linear.weight"] = torch.cat([state_dict["linear.weight"], torch.zeros((1, weights_per_class))])
+
+        # Append mean weights and bias in linear layer as initial parameters for target class
+        for param in ["bias", "weight"]:
+            current_param = state_dict[f"linear.{param}"]
+            mean = current_param.mean(dim=0, keepdim=True)
+            state_dict[f"linear.{param}"] = torch.cat([current_param, mean])
+
+        # Use modified state dict in finetuning model
         poi_warm_up_model.load_state_dict(state_dict)
 
         # Learning rate for poison-warm-up
