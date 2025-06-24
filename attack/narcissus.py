@@ -20,7 +20,6 @@ basic structure:
 
 '''
 import argparse
-import copy
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -87,40 +86,28 @@ class Narcissus(BadNet):
         parser.add_argument('--test_magnifier', type=str, help='Factor to magnify the trigger by at inference time')
         return parser
     
-    def get_train_dataset(self, dataset="cifar10", normalize=True):
+    def get_target_dataloader(self, normalize=True):
         assert 'args' in self.__dict__
-        args = copy.deepcopy(self.args)
-
-        # Get POOD dataset
-        if dataset != args.dataset:
-            # Remove args.dataset from args.dataset_path
-            args.dataset_path = args.dataset_path[:-len(args.dataset)]
-
-            # Replace args.dataset by args.pood_dataset, in order to set new dataset_path, img_size and num_classes
-            args.dataset = args.pood_dataset
-            self.process_args(args)
+        args = self.args
 
         # Get dataset and image transform
         train_dataset_without_transform, train_img_transform, \
         _, _, _, _ = dataset_and_transform_generate(args, normalize=normalize)
 
-        # Target dataset
-        if dataset != args.pood_dataset:
-            # Filter all classes except target class
-            train_labels = train_dataset_without_transform.targets
-            train_target_list = list(np.where(np.array(train_labels)==args.attack_target)[0])
-            train_dataset_without_transform = Subset(train_dataset_without_transform, train_target_list)
+        # Filter all classes except target class
+        train_labels = train_dataset_without_transform.targets
+        train_target_list = list(np.where(np.array(train_labels)==args.attack_target)[0])
+        train_target = Subset(train_dataset_without_transform, train_target_list)
 
-        # Apply transform to dataset
-        train_dataset = dataset_wrapper_with_transform(train_dataset_without_transform, train_img_transform)
+        # Label transform that sets all labels to the amount of classes of the POOD dataset
+        # This is the index that will be used for the target label in the poi_warm_up and trigger_generation models
+        new_target_label = get_num_classes(args.pood_dataset) 
+        train_label_transform = lambda l: new_target_label
 
-        return train_dataset
+        # Apply transforms to dataset
+        train_target = dataset_wrapper_with_transform(train_target, train_img_transform, train_label_transform)
 
-    def get_dataloader(self, dataset):
-        assert 'args' in self.__dict__
-        args = self.args
-
-        return DataLoader(dataset, pin_memory=args.pin_memory, batch_size=args.batch_size,
+        return DataLoader(train_target, pin_memory=args.pin_memory, batch_size=args.batch_size, 
                           num_workers=args.num_workers, shuffle=True)
 
     def poi_warm_up(self):
@@ -142,14 +129,6 @@ class Narcissus(BadNet):
         state_dict["linear.weight"] = torch.cat([state_dict["linear.weight"], torch.zeros((1, weights_per_class))])
         poi_warm_up_model.load_state_dict(state_dict)
 
-        # Get target and POOD datasets
-        target_dataset = self.get_train_dataset(args.dataset)
-        pood_dataset = self.get_train_dataset(args.pood_dataset)
-
-        # Combine datasets and create a dataloader
-        poi_warm_up_dataset = concoct_dataset(target_dataset, pood_dataset)
-        poi_warm_up_loader = self.get_dataloader(poi_warm_up_dataset)
-
         # Learning rate for poison-warm-up
         generating_lr_warmup = 0.1
         warmup_round = 5
@@ -163,7 +142,8 @@ class Narcissus(BadNet):
         for param in poi_warm_up_model.parameters():
             param.requires_grad = True
 
-        # Finetuning the surrogate model
+        # Training the surrogate model
+        poi_warm_up_loader = attack.get_target_dataloader()
         for epoch in range(0, warmup_round):
             poi_warm_up_model.train()
             loss_list = []
@@ -211,9 +191,8 @@ class Narcissus(BadNet):
         batch_pert = torch.autograd.Variable(noise.to(args.device), requires_grad=True)
         batch_opt = torch.optim.RAdam(params=[batch_pert],lr=generating_lr_tri)
 
-        # Get normalization transform separately from dataset in order to normalize after applying perturbation
-        target_dataset = self.get_train_dataset(args.dataset, normalize=False)
-        trigger_gen_loader = self.get_dataloader(target_dataset)
+        # Get dataloader without normalization, and normalization transform separately
+        trigger_gen_loader = attack.get_target_dataloader(normalize=False)
         normalize = get_dataset_normalization(args.dataset)
 
         for epoch in range(gen_round):
@@ -241,23 +220,6 @@ class Narcissus(BadNet):
         logging.info(f'Noise max val: {noise.max()}')
 
         return best_noise
-
-class concoct_dataset(torch.utils.data.Dataset):
-    def __init__(self, target_dataset, pood_dataset):
-        self.idataset = target_dataset
-        self.odataset = pood_dataset
-
-    def __getitem__(self, idx):
-        if idx < len(self.odataset):
-            img = self.odataset[idx][0]
-            labels = self.odataset[idx][1]
-        else:
-            img = self.idataset[idx-len(self.odataset)][0]
-            labels = len(self.odataset.wrapped_dataset.classes)
-        return (img,labels)
-
-    def __len__(self):
-        return len(self.idataset)+len(self.odataset)
 
 if __name__ == '__main__':
     attack = Narcissus()
