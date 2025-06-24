@@ -120,7 +120,7 @@ class Narcissus(BadNet):
         num_classes = get_num_classes(args.pood_dataset) + 1 # + 1 for data samples of target class
         img_size = get_input_shape(args.pood_dataset)
         assert img_size == args.img_size, "POOD dataset and target dataset should have same image size"
-        poi_warm_up_model = generate_cls_model(args.model, num_classes, img_size[0])
+        poi_warm_up_model = generate_cls_model(args.model, num_classes, img_size[0]).to(args.device)
 
         # Load state dict of surrogate model, add zero weights and bias for target class in linear layer
         state_dict = torch.load(os.path.join(args.surrogate_model_path, "clean_model.pth"))
@@ -157,7 +157,8 @@ class Narcissus(BadNet):
                 loss = criterion(outputs, labels)
                 loss.backward(retain_graph = True)
                 loss_list.append(float(loss.data))
-                acc_list.append(sum(labels == preds) / len(labels))
+                acc = sum(labels == preds) / len(labels)
+                acc_list.append(acc.cpu())
                 poi_warm_up_opt.step()
                 break
             ave_loss = np.average(np.array(loss_list))
