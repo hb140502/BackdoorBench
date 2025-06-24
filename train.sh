@@ -84,7 +84,7 @@ if [[ $attack != "prototype" ]]; then
         else # Create a new trigger based on a surrogate model trained on a POOD dataset
             pood_dataset=$(get_POOD_dataset $dataset)
             surrogate_model_path="${record_dir}/prototype_${model}_${pood_dataset}_pNone"
-            attack_opts="$attack_opts --attack_trigger_path $record_dir/$attack_id/trigger.npy"
+            attack_opts="$attack_opts --pood_dataset $pood_dataset --surrogate_model_path $surrogate_model_path"
         fi
     fi
 fi
