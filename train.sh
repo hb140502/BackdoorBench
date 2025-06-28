@@ -56,9 +56,12 @@ function get_blend_trigger() {
     fi
 }
 
+# Clean training configuration
+yaml_conf="--yaml_path $(get_clean_config)"
+
 # Add additional attack-specific configuration unless attack == prototype (clean model)
 if [[ $attack != "prototype" ]]; then
-    yaml_conf="--yaml_path  $(get_clean_config) --bd_yaml_path config/attack/custom/$attack.yaml"
+    yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
     attack_opts="--attack_target 0 --pratio $pratio"
 
     if [[ $attack == "badnet" ]]; then
