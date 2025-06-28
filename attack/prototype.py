@@ -138,7 +138,7 @@ class NormalCase:
 
         self.args = args
 
-    def benign_prepare(self, augment_before_trigger=False):
+    def benign_prepare(self):
 
         assert 'args' in self.__dict__
 
@@ -149,7 +149,7 @@ class NormalCase:
         train_label_transform, \
         test_dataset_without_transform, \
         test_img_transform, \
-        test_label_transform = dataset_and_transform_generate(args, augment_before_trigger=augment_before_trigger)
+        test_label_transform = dataset_and_transform_generate(args)
 
         logging.debug("dataset_and_transform_generate done")
 

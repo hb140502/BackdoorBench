@@ -139,7 +139,7 @@ def get_dataset_denormalization(normalization: transforms.Normalize):
     return invTrans
 
 
-def get_transform(dataset_name, input_height, input_width, train=True, random_crop_padding=4, augment_before_trigger=False):
+def get_transform(dataset_name, input_height, input_width, train=True, random_crop_padding=4):
     # idea : given name, return the final implememnt transforms for the dataset
     transforms_list = []
 
@@ -150,12 +150,11 @@ def get_transform(dataset_name, input_height, input_width, train=True, random_cr
 
     transforms_list.append(transforms.Resize((input_height, input_width)))
     
-    if not augment_before_trigger:
-        if train:
-            transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
-            transforms_list.append(transforms.RandomRotation(10))
-            if dataset_name == "cifar10":
-                transforms_list.append(transforms.RandomHorizontalFlip())
+    if train:
+        transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
+        transforms_list.append(transforms.RandomRotation(10))
+        if dataset_name == "cifar10":
+            transforms_list.append(transforms.RandomHorizontalFlip())
 
     transforms_list.append(transforms.ToTensor())
     transforms_list.append(get_dataset_normalization(dataset_name))
@@ -217,7 +216,7 @@ def get_transform_self(dataset_name, input_height, input_width, train=True, pref
     return transforms.Compose(transforms_list)
 
 
-def dataset_and_transform_generate(args, augment_before_trigger=False):
+def dataset_and_transform_generate(args):
     '''
     # idea : given args, return selected dataset, transforms for both train and test part of data.
     :param args:
@@ -228,8 +227,8 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
 
     '''
     if not args.dataset.startswith('test'):
-        train_img_transform = get_transform(args.dataset, *(args.img_size[:2]), train=True, augment_before_trigger=augment_before_trigger)
-        test_img_transform = get_transform(args.dataset, *(args.img_size[:2]), train=False, augment_before_trigger=augment_before_trigger)
+        train_img_transform = get_transform(args.dataset, *(args.img_size[:2]), train=True)
+        test_img_transform = get_transform(args.dataset, *(args.img_size[:2]), train=False)
     else:
         # test folder datset, use the mnist transform for convenience
         train_img_transform = get_transform('mnist', *(args.img_size[:2]), train=True)
@@ -241,17 +240,6 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
     train_dataset_without_transform, test_dataset_without_transform = None, None
 
     if (train_dataset_without_transform is None) or (test_dataset_without_transform is None):
-        if augment_before_trigger:
-            cifar10_h_flip = [transforms.RandomHorizontalFlip()] if args.dataset == "cifar10" else []
-            pre_trigger_train_transform_list = [
-                transforms.RandomCrop(args.img_size[:2], padding=4),
-                transforms.RandomRotation(10)
-            ] + cifar10_h_flip
-            pre_trigger_train_transform = transforms.Compose(pre_trigger_train_transform_list)
-            pre_trigger_test_transform = transforms.Resize(args.img_size[:2])
-        else:
-            pre_trigger_train_transform=None
-            pre_trigger_test_transform=None
 
         if args.dataset.startswith('test'):  # for test only
             from torchvision.datasets import ImageFolder
@@ -276,13 +264,13 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             train_dataset_without_transform = CIFAR10(
                 args.dataset_path,
                 train=True,
-                transform=pre_trigger_train_transform,
+                transform=None,
                 download=True,
             )
             test_dataset_without_transform = CIFAR10(
                 args.dataset_path,
                 train=False,
-                transform=pre_trigger_test_transform,
+                transform=None,
                 download=True,
             )
         elif args.dataset == 'cifar100':
@@ -290,13 +278,11 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             train_dataset_without_transform = CIFAR100(
                 root=args.dataset_path,
                 train=True,
-                transform=pre_trigger_train_transform,
                 download=True,
             )
             test_dataset_without_transform = CIFAR100(
                 root=args.dataset_path,
                 train=False,
-                transform=pre_trigger_test_transform,
                 download=True,
             )
         elif args.dataset == 'gtsrb':
@@ -317,12 +303,10 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             from dataset.Tiny import TinyImageNet
             train_dataset_without_transform = TinyImageNet(args.dataset_path,
                                                            split='train',
-                                                           transform=pre_trigger_train_transform,
                                                            download=True,
                                                            )
             test_dataset_without_transform = TinyImageNet(args.dataset_path,
                                                           split='val',
-                                                          transform=pre_trigger_test_transform,
                                                           download=True,
                                                           )
         elif args.dataset in ["imagenet", "imagenette"]:
@@ -348,12 +332,10 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             train_dataset_without_transform = ImageFolder(
                 root=f"{dataset_path}/train",
                 is_valid_file=is_valid_file,
-                transform=pre_trigger_train_transform
             )
             test_dataset_without_transform = ImageFolder(
                 root=f"{dataset_path}/val",
                 is_valid_file=is_valid_file,
-                transform=pre_trigger_train_transform
             )
 
     return train_dataset_without_transform, \

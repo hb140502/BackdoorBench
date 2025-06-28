@@ -190,7 +190,6 @@ class Args:
 
 def load_attack_result(
     save_path : str,
-    already_augmented=False
 ):
     '''
     This function first replicate the basic steps of generate models and clean train and test datasets
@@ -234,7 +233,7 @@ def load_attack_result(
         train_label_transform, \
         test_dataset_without_transform, \
         test_img_transform, \
-        test_label_transform = dataset_and_transform_generate(clean_setting, augment_before_trigger=already_augmented)
+        test_label_transform = dataset_and_transform_generate(clean_setting)
 
         clean_train_dataset_with_transform = dataset_wrapper_with_transform(
             train_dataset_without_transform,

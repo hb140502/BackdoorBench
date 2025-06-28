@@ -124,7 +124,7 @@ class BadNet(NormalCase):
         clean_train_dataset_targets, \
         clean_test_dataset_with_transform, \
         clean_test_dataset_targets \
-            = self.benign_prepare(augment_before_trigger=args.attack == "badnet") # Do not augment before trigger in the Blended attack, which is a child class of BadNet
+            = self.benign_prepare()
 
         train_bd_img_transform, test_bd_img_transform = bd_attack_img_trans_generate(args)
         ### get the backdoor transform on label
