@@ -26,7 +26,7 @@ function get_clean_config() {
     if [[ $dataset == "imagenette" ]]; then
         echo "config/attack/custom/imagenette.yaml"
     else
-        echo "config/attack/custom/cifar10.yaml"
+        echo "config/attack/custom/cifar.yaml"
     fi
 }
 
