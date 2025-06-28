@@ -3,11 +3,7 @@
 . ./input_validation.sh
 input_validation $@
 
-if [[ $dataset == "tiny" ]]; then
-    qos="csedu-normal"
-    time_limit="6:00:00" 
-    mem="8G"
-elif [[ $attack == "bpp" ]]; then
+if [[ $attack == "bpp" ]]; then
     qos="csedu-normal"
     time_limit="6:00:00" 
     mem="4G"

@@ -22,7 +22,13 @@ fi
 pratio_label=$(echo p$pratio | tr . -)
 attack_id="${attack}_${model}_${dataset}_${pratio_label}"
 
-yaml_conf="--yaml_path config/attack/custom/cifar10.yaml"
+function get_clean_config() {
+    if [[ $dataset == "imagenette" ]]; then
+        echo "config/attack/custom/imagenette.yaml"
+    else
+        echo "config/attack/custom/cifar10.yaml"
+    fi
+}
 
 function get_badnet_trigger() {
     if [[ $dataset == "tiny" ]]; then
@@ -52,7 +58,7 @@ function get_blend_trigger() {
 
 # Add additional attack-specific configuration unless attack == prototype (clean model)
 if [[ $attack != "prototype" ]]; then
-    yaml_conf="${yaml_conf} --bd_yaml_path config/attack/custom/$attack.yaml"
+    yaml_conf="--yaml_path  $(get_clean_config) --bd_yaml_path config/attack/custom/$attack.yaml"
     attack_opts="--attack_target 0 --pratio $pratio"
 
     if [[ $attack == "badnet" ]]; then

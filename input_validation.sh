@@ -21,7 +21,7 @@ Usage: ${0} <ATTACK> <MODEL ARCHITECTURE> <DATASET> <POISON RATE> <NUMBER OF EPO
     model_regex="^resnet18|vgg16|densenet121$"
     validate_str $model $model_regex
 
-    dataset_regex="^cifar10|cifar100|gtsrb$"
+    dataset_regex="^cifar10|cifar100|imagenette$"
     validate_str $dataset $dataset_regex
 
     pratio_regex="^0.003|0.05|0.1|None$" # Last option for clean model

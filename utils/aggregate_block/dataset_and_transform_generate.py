@@ -26,7 +26,7 @@ from utils.bd_dataset import xy_iter
 
 def get_num_classes(dataset_name: str) -> int:
     # idea : given name, return the number of class in the dataset
-    if dataset_name in ["mnist", "cifar10"]:
+    if dataset_name in ["mnist", "cifar10", "imagenette"]:
         num_classes = 10
     elif dataset_name == "gtsrb":
         num_classes = 43
@@ -73,6 +73,10 @@ def get_input_shape(dataset_name: str) -> Tuple[int, int, int]:
         input_height = 224
         input_width = 224
         input_channel = 3
+    elif dataset_name == 'imagenette':
+        input_height = 80
+        input_width = 80
+        input_channel = 3
     else:
         raise Exception("Invalid Dataset")
     return input_height, input_width, input_channel
@@ -101,6 +105,8 @@ def get_dataset_normalization(dataset_name):
                 std=[0.229, 0.224, 0.225],
             )
         )
+    elif dataset_name == "imagenette":
+        dataset_normalization = transforms.Normalize([0.4671, 0.4593, 0.4306], [0.2692, 0.2657, 0.2884])
     else:
         raise Exception("Invalid Dataset")
     return dataset_normalization
@@ -138,6 +144,11 @@ def get_transform(dataset_name, input_height, input_width, train=True, random_cr
     transforms_list = []
 
     if not augment_before_trigger:
+        # Images are not square, but one side is always 160 pixels (for the 160x160 version of the dataset)
+        # We make the images square with CenterCrop
+        if dataset_name == "imagenette":
+            transforms_list.append(transforms.CenterCrop((160, 160)))
+
         transforms_list.append(transforms.Resize((input_height, input_width)))
         if train:
             transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
@@ -314,7 +325,7 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
                                                           transform=pre_trigger_test_transform,
                                                           download=True,
                                                           )
-        elif args.dataset == "imagenet":
+        elif args.dataset in ["imagenet", "imagenette"]:
             from torchvision.datasets import ImageFolder
 
             def is_valid_file(path):
@@ -329,12 +340,17 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             logging.warning("For ImageNet, this script need large size of RAM to load the whole dataset.")
             logging.debug("We will provide a different script later to handle this problem for backdoor ImageNet.")
 
+            if args.dataset == "imagenette":
+                dataset_path = f"{args.dataset_path}/imagenette2_160"
+            else:
+                dataset_path = args.datset_path
+
             train_dataset_without_transform = ImageFolder(
-                root=f"{args.dataset_path}/train",
+                root=f"{dataset_path}/train",
                 is_valid_file=is_valid_file,
             )
             test_dataset_without_transform = ImageFolder(
-                root=f"{args.dataset_path}/val",
+                root=f"{dataset_path}/val",
                 is_valid_file=is_valid_file,
             )
 
