@@ -31,16 +31,16 @@ function get_clean_config() {
 }
 
 function get_badnet_trigger() {
-    if [[ $dataset == "tiny" ]]; then
-        echo "./resource/badnet/badnet_patch_64.png"
+    if [[ $dataset == "imagenette" ]]; then
+        echo "./resource/badnet/badnet_patch_80.png"
     else
         echo "./resource/badnet/badnet_patch_32.png"
     fi
 }
 
 function get_badnet_mask() {
-    if [[ $dataset == "tiny" ]]; then
-        echo "./resource/badnet/white_square_64.png"
+    if [[ $dataset == "imagenette" ]]; then
+        echo "./resource/badnet/white_square_80.png"
     else
         echo "./resource/badnet/white_square_32.png"
     fi
@@ -49,8 +49,8 @@ function get_badnet_mask() {
 function get_blend_trigger() {
     path_to_trigger="./resource/blended"
 
-    if [[ $dataset == "tiny" ]]; then
-        echo "$path_to_trigger/hellokitty_64.png"
+    if [[ $dataset == "imagenette" ]]; then
+        echo "$path_to_trigger/hellokitty_80.png"
     else
         echo "$path_to_trigger/hellokitty_32.png"
     fi

@@ -143,13 +143,14 @@ def get_transform(dataset_name, input_height, input_width, train=True, random_cr
     # idea : given name, return the final implememnt transforms for the dataset
     transforms_list = []
 
-    if not augment_before_trigger:
-        # Images are not square, but one side is always 160 pixels (for the 160x160 version of the dataset)
-        # We make the images square with CenterCrop
-        if dataset_name == "imagenette":
-            transforms_list.append(transforms.CenterCrop((160, 160)))
+    # Images are not square, but one side is always 160 pixels (for the 160x160 version of the dataset)
+    # We make the images square with CenterCrop
+    if dataset_name == "imagenette":
+        transforms_list.append(transforms.CenterCrop((160, 160)))
 
-        transforms_list.append(transforms.Resize((input_height, input_width)))
+    transforms_list.append(transforms.Resize((input_height, input_width)))
+    
+    if not augment_before_trigger:
         if train:
             transforms_list.append(transforms.RandomCrop((input_height, input_width), padding=random_crop_padding))
             transforms_list.append(transforms.RandomRotation(10))
@@ -243,7 +244,6 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
         if augment_before_trigger:
             cifar10_h_flip = [transforms.RandomHorizontalFlip()] if args.dataset == "cifar10" else []
             pre_trigger_train_transform_list = [
-                transforms.Resize(args.img_size[:2]),
                 transforms.RandomCrop(args.img_size[:2], padding=4),
                 transforms.RandomRotation(10)
             ] + cifar10_h_flip
@@ -348,10 +348,12 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             train_dataset_without_transform = ImageFolder(
                 root=f"{dataset_path}/train",
                 is_valid_file=is_valid_file,
+                transform=pre_trigger_train_transform
             )
             test_dataset_without_transform = ImageFolder(
                 root=f"{dataset_path}/val",
                 is_valid_file=is_valid_file,
+                transform=pre_trigger_train_transform
             )
 
     return train_dataset_without_transform, \
