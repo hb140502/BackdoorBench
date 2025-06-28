@@ -341,7 +341,7 @@ def dataset_and_transform_generate(args, augment_before_trigger=False):
             logging.debug("We will provide a different script later to handle this problem for backdoor ImageNet.")
 
             if args.dataset == "imagenette":
-                dataset_path = f"{args.dataset_path}/imagenette2_160"
+                dataset_path = f"{args.dataset_path}/imagenette2-160"
             else:
                 dataset_path = args.datset_path
 
