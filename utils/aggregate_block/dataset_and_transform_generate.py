@@ -143,11 +143,6 @@ def get_transform(dataset_name, input_height, input_width, train=True, random_cr
     # idea : given name, return the final implememnt transforms for the dataset
     transforms_list = []
 
-    # Images are not square, but one side is always 160 pixels (for the 160x160 version of the dataset)
-    # We make the images square with CenterCrop
-    if dataset_name == "imagenette":
-        transforms_list.append(transforms.CenterCrop((160, 160)))
-
     transforms_list.append(transforms.Resize((input_height, input_width)))
     
     if train:
@@ -324,17 +319,12 @@ def dataset_and_transform_generate(args):
             logging.warning("For ImageNet, this script need large size of RAM to load the whole dataset.")
             logging.debug("We will provide a different script later to handle this problem for backdoor ImageNet.")
 
-            if args.dataset == "imagenette":
-                dataset_path = f"{args.dataset_path}/imagenette2-160"
-            else:
-                dataset_path = args.datset_path
-
             train_dataset_without_transform = ImageFolder(
-                root=f"{dataset_path}/train",
+                root=f"{args.dataset_path}/train",
                 is_valid_file=is_valid_file,
             )
             test_dataset_without_transform = ImageFolder(
-                root=f"{dataset_path}/val",
+                root=f"{args.dataset_path}/val",
                 is_valid_file=is_valid_file,
             )
 
