@@ -112,6 +112,9 @@ def back_to_np_4d(inputs, args):
     elif args.dataset == "tiny":
         expected_values = [0.4802, 0.4481, 0.3975]
         variance = [0.2302, 0.2265, 0.2262]
+    elif args.dataset == "imagenette":
+        expected_values = [0.4671, 0.4593, 0.4306]
+        variance = [0.2692, 0.2657, 0.2884]
     inputs_clone = inputs.clone()
 
     if args.dataset == "mnist":
@@ -143,6 +146,9 @@ def np_4d_to_tensor(inputs, args):
     elif args.dataset == "tiny":
         expected_values = [0.4802, 0.4481, 0.3975]
         variance = [0.2302, 0.2265, 0.2262]
+    elif args.dataset == "imagenette":
+        expected_values = [0.4671, 0.4593, 0.4306]
+        variance = [0.2692, 0.2657, 0.2884]
     inputs_clone = inputs.clone().div(255.0)
 
     if args.dataset == "mnist":
