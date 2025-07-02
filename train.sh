@@ -56,6 +56,19 @@ function get_blend_trigger() {
     fi
 }
 
+function get_POOD_dataset() {
+    target_dataset=$1
+
+    if [[ $target_dataset == "cifar10" ]]; then
+        echo "cifar100"
+    elif [[ $target_dataset == "cifar100" ]]; then
+        echo "cifar10"
+    elif [[ $target_dataset == "gtsrb" ]]; then
+        echo "TODO: find POOD dataset for GTSRB"
+        exit 1
+    fi
+}
+
 # Clean training configuration
 yaml_conf="--yaml_path $(get_clean_config)"
 
@@ -70,6 +83,18 @@ if [[ $attack != "prototype" ]]; then
         attack_opts="$attack_opts --attack_trigger_img_path $(get_blend_trigger)"
     elif [[ $attack == "bpp" ]]; then
         attack_opts="$attack_opts --neg_ratio $pratio"
+    elif [[ $attack == "narcissus" ]]; then
+        trigger_paths=$(find $record_dir/narcissus_${model}_${dataset}_* -name "trigger.npy")
+        first_trigger_path=$(echo $trigger_paths | cut -d ' ' -f1)
+
+        # If there already is a trigger for this model and dataset, reuse it
+        if [[ -n $first_trigger_path ]]; then
+            attack_opts="$attack_opts --attack_trigger_path $first_trigger_path"
+        else # Create a new trigger based on a surrogate model trained on a POOD dataset
+            pood_dataset=$(get_POOD_dataset $dataset)
+            surrogate_model_path="${record_dir}/prototype_${model}_${pood_dataset}_pNone"
+            attack_opts="$attack_opts --pood_dataset $pood_dataset --surrogate_model_path $surrogate_model_path"
+        fi
     fi
 fi
 

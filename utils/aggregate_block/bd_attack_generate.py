@@ -9,6 +9,7 @@ import torchvision.transforms as transforms
 
 from utils.bd_img_transform.lc import labelConsistentAttack
 from utils.bd_img_transform.blended import blendedImageAttack
+from utils.bd_img_transform.narcissus import narcissusAttack
 from utils.bd_img_transform.patch import AddMaskPatchTrigger, SimpleAdditiveTrigger
 from utils.bd_img_transform.sig import sigTriggerAttack
 from utils.bd_img_transform.SSBA import SSBA_attack_replace_version
@@ -116,6 +117,29 @@ def bd_attack_img_trans_generate(args):
             (npClipAndToUint8,False),
             (Image.fromarray, False),
         ])
+
+    elif args.attack == 'narcissus':
+        def get_bd_transform(trigger_multiplier):
+            trans = narcissusAttack(
+                        np.round(
+                            np.load(args.attack_trigger_path)[0] * 255,
+                            decimals=0,
+                        ).astype(np.int16).transpose(1, 2, 0),
+                        trigger_multiplier
+            )
+
+            print(trans.trigger.max())
+
+            return general_compose([
+                (transforms.Resize(args.img_size[:2]), False),
+                (np.array, False),
+                (trans, False),
+                (npClipAndToUint8,False),
+                (Image.fromarray, False),
+            ])
+        
+        train_bd_transform = get_bd_transform(1)
+        test_bd_transform = get_bd_transform(args.test_magnifier)
 
     elif args.attack == 'sig':
         trans = sigTriggerAttack(

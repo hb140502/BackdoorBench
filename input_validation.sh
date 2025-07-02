@@ -15,7 +15,7 @@ Usage: ${0} <ATTACK> <MODEL ARCHITECTURE> <DATASET> <POISON RATE> <NUMBER OF EPO
     pratio=$4
     n_epochs=$5
 
-    attack_regex="^prototype|badnet|blended|wanet|bpp$"
+    attack_regex="^prototype|badnet|blended|wanet|bpp|narcissus$"
     validate_str $attack $attack_regex
 
     model_regex="^resnet18|vgg16|densenet121$"
