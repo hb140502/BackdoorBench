@@ -105,7 +105,6 @@ class Narcissus(BadNet):
         # Get properties of POOD dataset in order to initialize finetuning model
         num_classes = get_num_classes(args.pood_dataset) + 1 # + 1 for data samples of target class
         img_size = get_input_shape(args.pood_dataset)
-        assert img_size == args.img_size, "POOD dataset and target dataset should have same image size"
         poi_warm_up_model = generate_cls_model(args.model, num_classes, img_size[0]).to(args.device)
 
         # Load state dict of surrogate model

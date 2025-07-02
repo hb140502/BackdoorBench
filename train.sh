@@ -63,9 +63,8 @@ function get_POOD_dataset() {
         echo "cifar100"
     elif [[ $target_dataset == "cifar100" ]]; then
         echo "cifar10"
-    elif [[ $target_dataset == "gtsrb" ]]; then
-        echo "TODO: find POOD dataset for GTSRB"
-        exit 1
+    elif [[ $target_dataset == "imagenette" ]]; then
+        echo "cifar10"
     fi
 }
 
