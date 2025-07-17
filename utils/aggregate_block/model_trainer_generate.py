@@ -84,7 +84,8 @@ def generate_cls_model(
     elif model_name == "vgg11":
         net = models.vgg11(num_classes=num_classes, **kwargs)
     elif model_name == 'vgg16':
-        net = models.vgg16(num_classes=num_classes, **kwargs)
+        from models.vgg import VGG16
+        net = VGG16(num_classes=num_classes)
     elif model_name == 'vgg19':
         net = models.vgg19(num_classes=num_classes, **kwargs)
     elif model_name == 'vgg19_bn':
