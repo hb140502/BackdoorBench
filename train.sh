@@ -111,8 +111,6 @@ cd $record_dir
 
 # Remove additional bpp datasets before creating tar
 if [ $attack == "bpp" ]; then
-    cp $attack_id "../bpp_backups/${attack_id}_${timestamp}" # Make backup just in case
-    
     cd $attack_id
     rm -rf "clean_train_dataset" "clean_test_dataset" "bd_train_dataset_Save" "bd_test_all_dataset" 
     cd ..
