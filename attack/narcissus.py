@@ -110,11 +110,13 @@ class Narcissus(BadNet):
         # Load state dict of surrogate model
         state_dict = torch.load(os.path.join(args.surrogate_model_path, "clean_model.pth"))
 
-        # Append mean weights and bias in linear layer as initial parameters for target class
+        # Append mean weights and bias in output layer as initial parameters for target class
         for param in ["bias", "weight"]:
-            current_param = state_dict[f"linear.{param}"]
+            # ResNet18 and VGG16 have different names for output layer
+            output_layer_name = "linear" if args.model == "resnet18" else "classifier"
+            current_param = state_dict[f"{output_layer_name}.{param}"]
             mean = current_param.mean(dim=0, keepdim=True)
-            state_dict[f"linear.{param}"] = torch.cat([current_param, mean])
+            state_dict[f"{output_layer_name}.{param}"] = torch.cat([current_param, mean])
 
         # Use modified state dict in finetuning model
         poi_warm_up_model.load_state_dict(state_dict)
