@@ -10,8 +10,8 @@ if [[ -z $my_dir ]]; then
     exit 1
 fi
 
-data_dir="$my_dir/record/data"
-record_dir="$my_dir/record"
+data_dir="/vol/aisy/xxu/data/"
+record_dir="$my_dir/record_cn114"
 timestamp=$(date +"T%d-%m_%H-%M")
 
 # gpu=$(python get_gpu.py)
@@ -70,7 +70,7 @@ function get_POOD_dataset() {
     target_dataset=$1
 
     if [[ $target_dataset == "cifar10" ]]; then
-        echo "cifar100"
+        echo "cifar10"
     elif [[ $target_dataset == "cifar100" ]]; then
         echo "cifar10"
     elif [[ $target_dataset == "imagenette" ]]; then

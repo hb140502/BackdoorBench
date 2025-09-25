@@ -6,6 +6,7 @@ import sys
 sys.path.append('../../')
 
 import torch
+import timm
 import torchvision.models as models
 from torchvision.models.resnet import resnet34, resnet50
 from typing import Optional
@@ -47,6 +48,7 @@ def generate_cls_model(
         model_name: str,
         num_classes: int = 10,
         image_size: int = 32,
+        patch_size: int = 4,
         **kwargs,
 ):
     '''
@@ -121,7 +123,12 @@ def generate_cls_model(
         net = efficientnet_b3(num_classes=num_classes, **kwargs)
     elif model_name.startswith("vit"):
         logging.debug("All vit model use the default pretrain and resize to match the input shape!")
-        if model_name == 'vit_b_16':
+        if model_name == 'vit_small':
+            net = timm.create_model('vit_small_patch16_224', 
+                num_classes=num_classes, 
+                patch_size=patch_size, 
+                img_size=image_size)
+        elif model_name == 'vit_b_16':
             net = vit_b_16(
                 pretrained=True,
                 **{k: v for k, v in kwargs.items() if k != "pretrained"}

@@ -223,6 +223,7 @@ class NormalCase:
             model_name=args.model,
             num_classes=args.num_classes,
             image_size=args.img_size[0],
+            patch_size=args.patch_size
         )
 
         self.device = torch.device(

@@ -8,3 +8,4 @@
 input_validation $@
 
 ./train.sh $attack $model $dataset $pratio $n_epochs
+# CUDA_VISIBLE_DEVICES=1 ./train.sh wanet resnet18 tiny 0.05 100

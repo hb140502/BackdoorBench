@@ -18,13 +18,13 @@ Usage: ${0} <ATTACK> <MODEL ARCHITECTURE> <DATASET> <POISON RATE> <NUMBER OF EPO
     attack_regex="^prototype|badnet|blended|wanet|bpp|narcissus$"
     validate_str $attack $attack_regex
 
-    model_regex="^resnet18|vgg16|densenet121$"
+    model_regex="^resnet18|vgg16|densenet121|vit_small$"
     validate_str $model $model_regex
 
-    dataset_regex="^cifar10|cifar100|imagenette$"
+    dataset_regex="^cifar10|cifar100|imagenette|tiny$"
     validate_str $dataset $dataset_regex
 
-    pratio_regex="^0.003|0.007|0.05|None$" # Last option for clean model
+    pratio_regex="^0.005|0.004|0.003|0.007|0.05|None$" # Last option for clean model
     validate_str $pratio $pratio_regex
 
     n_epochs_regex="^[0-9]+$"

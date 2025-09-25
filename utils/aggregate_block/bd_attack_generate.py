@@ -6,6 +6,8 @@ import imageio
 from PIL import Image
 import numpy as np
 import torchvision.transforms as transforms
+import torchvision
+import torch
 
 from utils.bd_img_transform.lc import labelConsistentAttack
 from utils.bd_img_transform.blended import blendedImageAttack
@@ -120,9 +122,14 @@ def bd_attack_img_trans_generate(args):
 
     elif args.attack == 'narcissus':
         def get_bd_transform(trigger_multiplier):
+            narcissus_trigger = np.load(args.attack_trigger_path)
+            if args.dataset == 'tiny':
+                narcissus_resize = Resize(64, interpolation=torchvision.transforms.InterpolationMode.BICUBIC)
+                narcissus_trigger = narcissus_resize(torch.from_numpy(narcissus_trigger)).numpy()
+
             trans = narcissusAttack(
                         np.round(
-                            np.load(args.attack_trigger_path)[0] * 255,
+                            narcissus_trigger[0] * 255,
                             decimals=0,
                         ).astype(np.int16).transpose(1, 2, 0),
                         trigger_multiplier
